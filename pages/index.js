@@ -15,12 +15,12 @@ function ProfileSidebar(propriedades) {
 export default function Home() {
   const githubUser = 'Mdamian1';
   const pessoasFavoritas = [
+    'emilypadilha',
     'juunegreiros',
     'omariosouto',
     'peas',
     'rafaballerini',
-    'marcobrunodev',
-    'felipefialho'
+    'marcobrunodev'
   ]
 
   return (
