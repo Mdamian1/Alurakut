@@ -20,13 +20,35 @@ function ProfileSidebar(propriedades) {
   );
 }
 
+function ProfileRelationsBox(propriedades) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">{propriedades.title} ({ propriedades.items.length })</h2>
+      <ul>
+        {propriedades.items.map((itemAtual) => {
+          return (
+            <li key={itemAtual}>
+              <a href={`/users/${itemAtual.url}`}>
+                <img src={itemAtual.avatar_url} />
+                <span>{itemAtual.login}</span>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  );
+}
+
 export default function Home() {
   const githubUser = 'Mdamian1';
+
   const [comunidades, setComunidades] = React.useState([{
     id: new Date().toISOString(),
     title: "Eu odeio acordar cedo",
     image: "https://alurakut.vercel.app/capa-comunidade-01.jpg",
   }]);
+
   const pessoasFavoritas = [
     'emilypadilha',
     'juunegreiros',
@@ -35,6 +57,18 @@ export default function Home() {
     'rafaballerini',
     'marcobrunodev'
   ]
+
+  const [seguidores, setSeguidores] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch(`https://api.github.com/users/Mdamian1/followers`)
+      .then((respostaDoServidor) => {
+        return respostaDoServidor.json();
+      })
+      .then((respostaCompleta) => {
+        setSeguidores(respostaCompleta);
+      });
+  }, []);
 
   return (
     <>
@@ -88,6 +122,9 @@ export default function Home() {
         </div>
 
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+          
+          <ProfileRelationsBox title="Seguidores" items={seguidores} />
+
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">Comunidades ({ comunidades.length })</h2>
             <ul>
@@ -103,6 +140,7 @@ export default function Home() {
               })}
             </ul>
           </ProfileRelationsBoxWrapper>
+
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">Pessoas da comunidade ({ pessoasFavoritas.length })</h2>
             <ul>
