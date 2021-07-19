@@ -1,8 +1,10 @@
 import React from 'react';
-import MainGrid from '../src/components/MainGrid'
-import Box from '../src/components/Box'
-import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
-import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
+import nookies from 'nookies';
+import jwt from 'jsonwebtoken';
+import MainGrid from '../src/components/MainGrid';
+import Box from '../src/components/Box';
+import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
+import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
 function ProfileSidebar(propriedades) { 
   return (
@@ -21,6 +23,7 @@ function ProfileSidebar(propriedades) {
 }
 
 function ProfileRelationsBox(propriedades) {
+  console.log(propriedades)
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">{propriedades.title} ({ propriedades.items.length })</h2>
@@ -40,8 +43,8 @@ function ProfileRelationsBox(propriedades) {
   );
 }
 
-export default function Home() {
-  const githubUser = 'Mdamian1';
+export default function Home(props) {
+  const githubUser = props.githubUser;
 
   const [comunidades, setComunidades] = React.useState([]);
 
@@ -57,7 +60,7 @@ export default function Home() {
   const [seguidores, setSeguidores] = React.useState([]);
 
   React.useEffect(() => {
-    fetch(`https://api.github.com/users/Mdamian1/followers`)
+    fetch(`https://api.github.com/users/${githubUser}/followers`)
       .then((respostaDoServidor) => {
         return respostaDoServidor.json();
       })
@@ -202,4 +205,29 @@ export default function Home() {
       </MainGrid>
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const cookies = nookies.get(context);
+  const token = cookies.USER_TOKEN;
+  const { githubUser } = jwt.decode(token);
+
+  const dadosGit = await fetch(`https://api.github.com/users/${githubUser}`)
+    .then((resposta) => resposta.json());
+
+  if (typeof dadosGit.login == 'undefined') {
+    nookies.destroy(context, 'USER_TOKEN')
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    }
+  }
+
+  return {
+    props: {
+      githubUser
+    }
+  }
 }
